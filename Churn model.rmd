@@ -1,0 +1,82 @@
+---
+title: "Churn model"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+I will start by loading up my packages
+
+```{r}
+library(randomForest)
+library(caret)
+library(ResourceSelection)
+```
+
+
+```{r cars}
+user_data <- read.csv("~/Downloads/churn-data-full (1).csv")
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+head(user_data)
+#print(summary(user_data))
+
+```
+
+I do not need to do a full EDA on this data set since I created the curated list myself. I also did not perform a full ML project so I did not need to split into test/training.
+
+```{r test and train}
+#library(caret)
+#set.seed(3456)
+#trainIndex <- createDataPartition(user_data$isChurn, p = .8, 
+#                                  list = FALSE, 
+#                                  times = 1)
+#head(trainIndex)
+#churntrain <-user_data[ trainIndex]
+#churntest <-user_data [-trainIndex]
+```
+
+
+```{r glm}
+
+model <- randomForest(as.factor(isChurn) ~ FIRST_DB + FIRST_QZ_AT_WORK + Region + device + time_on_site + JOB_CATEGORY + total_visits + FIRST_OBESSIONS , data=user_data, importance=TRUE, omit.na=TRUE)
+```
+
+```{r model view}
+model$importance
+```
+
+```{r}
+modelglm <- glm(isChurn ~ FIRST_DB + FIRST_QZ_AT_WORK + Region + device + time_on_site + JOB_CATEGORY + total_visits + FIRST_OBESSIONS , data=user_data)
+```
+
+```{r}
+summary(modelglm)
+```
+
+```{r}
+hoslem.test(modelglm$y, modelglm$fitted)
+```
+
+```{r}
+modelglm_job <- glm(isChurn ~ FIRST_DB * JOB_CATEGORY + FIRST_QZ_AT_WORK * JOB_CATEGORY + FIRST_OBESSIONS , data=user_data)
+```
+
+
+```{r}
+summary(modelglm_job)
+```
+
+```{r}
+hoslem.test(modelglm_job$y, modelglm_job$fitted)
+```
+
